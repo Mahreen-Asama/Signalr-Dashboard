@@ -1,0 +1,162 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <h1 class="text-center m-3">Dashboard</h1>
+    <div class="row text-white p-3">
+        <div class="col bg-info border border-info rounded-3 m-2">
+            <h4>
+                <i class="fa-solid fa-users p-3" style="font-size:36px;"></i> Total Users: 
+                <span id="totalUsers">@ViewBag.TotalUsers</span>
+            </h4>
+        </div>
+        <div class="col bg-warning border border-warning rounded-3 m-2">
+            <h4>
+                <i class="fa-solid fa-arrow-pointer p-3" style="font-size:36px;"></i> Total Actions: 
+                <span id="totalActions">@ViewBag.TotalActions</span>
+            </h4>
+        </div>
+    </div>
+    <div class="row text-center p-3">
+        <div class="col border border-dark rounded-3 p-3 m-2">
+            <h4>Device Chart</h4>
+            <canvas id="deviceChart"></canvas>
+        </div>
+        <div class="col border border-dark rounded-3 p-3 m-2">
+            <h4>Browser Chart</h4>
+            <canvas id="browserChart"></canvas>
+        </div>
+        <div class="col border border-dark rounded-3 p-3 m-2">
+            <h4>OS Chart</h4>
+            <canvas id="osChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    //----------------- Browser chart -------------------
+    var brXValues = [];
+    var brYValues = [];
+    var colors=['pink','skyblue','yellow','purple','green'];
+
+    var brData = @Html.Raw(Json.Serialize(ViewBag.BrowserData));
+    for (let i = 0; i < brData.length; i++) {
+        brXValues.push(brData[i].value);
+        brYValues.push(brData[i].count);
+    }
+    const browser = document.getElementById('browserChart');
+    var brChart = new Chart(browser, {
+        type: 'doughnut',
+        data: {
+            labels: brXValues,
+            datasets: [{
+                label: 'Browsers',
+                data: brYValues,
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            aspectRatio: 1.3,
+        }
+    });
+    connection.on("BrowserDetails", (brDetailsList) => {
+        brXValues = [];
+        brYValues = [];
+        for (let i = 0; i < brDetailsList.length; i++) {
+            brXValues.push(brDetailsList[i].value);
+            brYValues.push(brDetailsList[i].count);
+        }
+        brChart.destroy();
+        brChart = new Chart(browser, {
+            type: 'doughnut',
+            data: {
+                labels: brXValues,
+                datasets: [{
+                    label: 'Browsers',
+                    data: brYValues,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                aspectRatio: 1.3,
+            }
+        });
+    });
+    //----------------- device chart -------------------
+    var devXValues = [];
+    var devYValues = [];
+    var devData = @Html.Raw(Json.Serialize(ViewBag.DeviceData));
+    for (let i = 0; i < devData.length; i++) {
+        devXValues.push(devData[i].value);
+        devYValues.push(devData[i].count);
+    }
+    const device = document.getElementById('deviceChart');
+    var devChart = new Chart(device, {
+        type: 'bar',
+        data: {
+            labels: devXValues,
+            datasets: [{
+                label: 'Devices',
+                data: devYValues,
+            }]
+        }
+    });
+    connection.on("DeviceDetails", (devDetailsList) => {
+        devXValues = [];
+        devYValues = [];
+        for (let i = 0; i < devDetailsList.length; i++) {
+            devXValues.push(devDetailsList[i].value);
+            devYValues.push(devDetailsList[i].count);
+        }
+        devChart.destroy();
+        devChart = new Chart(device, {
+            type: 'bar',
+            data: {
+                labels: devXValues,
+                datasets: [{
+                    label: 'Devices',
+                    data: devYValues,
+                }]
+            }
+        });
+    });
+    //----------------- os chart -----------------------
+    var osXValues = [];
+    var osYValues = [];
+    var osData = @Html.Raw(Json.Serialize(ViewBag.OsData));
+    for (let i = 0; i < osData.length; i++) {
+        osXValues.push(osData[i].value);
+        osYValues.push(osData[i].count);
+    }
+    const ops = document.getElementById('osChart');
+    var osChart = new Chart(ops, {
+        type: 'bar',
+        data: {
+            labels: osXValues,
+            datasets: [{
+                label: 'Operating Systems',
+                data: osYValues,
+            }]
+        }
+    });
+    connection.on("OsDetails", (osDetailsList) => {
+        osXValues = [];
+        osYValues = [];
+        for (let i = 0; i < osDetailsList.length; i++) {
+            osXValues.push(osDetailsList[i].value);
+            osYValues.push(osDetailsList[i].count);
+        }
+        osChart.destroy();
+        osChart = new Chart(ops, {
+            type: 'bar',
+            data: {
+                labels: osXValues,
+                datasets: [{
+                    label: 'Operating Systems',
+                    data: osYValues,
+                }]
+            }
+        });
+    });
+</script>
